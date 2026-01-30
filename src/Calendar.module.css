@@ -91,7 +91,6 @@
       bottom: -1px;
       left: -1px;
       position: absolute;
-      overflow: hidden;
 
       & > .indicator {
         margin-inline: 0px;
