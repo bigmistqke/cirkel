@@ -128,8 +128,12 @@ export function Home() {
                 class={styles['text-path']}
                 href="#MyPath"
                 stroke="white"
-                startOffset="25px"
-                textLength="85px"
+                // Centre on the arc and let textLength set the spacing, so the label sits
+                // the same whichever serif font the device substitutes for "times".
+                startOffset="50%"
+                text-anchor="middle"
+                textLength="85"
+                lengthAdjust="spacing"
               >
                 a new cycle
               </textPath>
