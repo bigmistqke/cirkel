@@ -34,7 +34,8 @@ export default function () {
         const data = JSON.parse(json) as SerializedCirkelStore
         return {
           ...data,
-          entries: data.entries.map(entry => ({ ...entry, date: new Date(entry.date) })),
+          // normalizeDate also migrates entries saved as UTC midnights by older versions.
+          entries: data.entries.map(entry => ({ ...entry, date: normalizeDate(new Date(entry.date)) })),
           currentDate: normalizeDate(new Date()),
         }
       },

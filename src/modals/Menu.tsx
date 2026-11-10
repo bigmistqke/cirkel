@@ -1,7 +1,6 @@
 import { produce } from 'solid-js/store'
 import { themes, useCirkel } from '../CirkelStoreContext'
-import { DAY } from '../constants'
-import { getDayOfTheCycle, postfixOrdinal } from '../utils'
+import { addDays, getDayOfTheCycle, postfixOrdinal } from '../utils'
 import { Modal, ModalProps } from './Modal'
 
 export function MenuModal(props: Omit<ModalProps, 'children'>) {
@@ -38,7 +37,7 @@ export function MenuModal(props: Omit<ModalProps, 'children'>) {
             setStore(
               produce(store => {
                 const entry = store.entries[store.entries.length - 1]
-                entry.date = new Date(entry.date.getTime() + DAY)
+                entry.date = addDays(entry.date, 1)
               }),
             )
           }
@@ -46,7 +45,7 @@ export function MenuModal(props: Omit<ModalProps, 'children'>) {
             setStore(
               produce(store => {
                 const entry = store.entries[store.entries.length - 1]
-                entry.date = new Date(entry.date.getTime() - DAY)
+                entry.date = addDays(entry.date, -1)
               }),
             )
           }

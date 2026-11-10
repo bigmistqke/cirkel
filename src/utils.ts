@@ -18,33 +18,31 @@ export const isSameDayOrBefore = (a: Date | null, b: Date | null) => {
   return false
 }
 
+/** Local midnight of the calendar day `date` falls on. */
 export function normalizeDate(date: Date) {
-  return new Date(Math.ceil(date.getTime() / DAY) * DAY)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
 
 export function addHour(date: Date) {
   return new Date(date.getTime() + HOUR)
 }
 
+/** Shift by calendar days, so a DST change does not move the time of day. */
 export function addDays(date: Date, amount: number) {
-  return new Date(date.getTime() + amount * DAY)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount)
+}
+
+/** Whole calendar days from `a` to `b`; rounding absorbs 23h/25h DST days. */
+export function daysBetween(a: Date, b: Date) {
+  return Math.round((normalizeDate(b).getTime() - normalizeDate(a).getTime()) / DAY)
 }
 
 export function getDayOfTheCycle(store: CirkelStore, date: Date) {
-  let last = store.entries[store.entries.length - 1].date
-  let lastTime = last.getTime()
-  const normalizedDate = normalizeDate(date).getTime()
-
-  if (last.getTime() > normalizedDate) {
-    lastTime -=
-      Math.floor((lastTime - normalizedDate) / store.settings.cycle.cycleDuration) *
-      store.settings.cycle.cycleDuration *
-      DAY
-  }
-
-  const dayOfTheCycle = ((normalizedDate - lastTime) / DAY) % store.settings.cycle.cycleDuration
-
-  return dayOfTheCycle
+  const last = store.entries[store.entries.length - 1].date
+  const { cycleDuration } = store.settings.cycle
+  const days = daysBetween(last, date)
+  // Dates before the last entry extrapolate the cycle backwards.
+  return ((days % cycleDuration) + cycleDuration) % cycleDuration
 }
 
 export function getDaysUntilCycleCompletes(store: CirkelStore, date: Date) {
