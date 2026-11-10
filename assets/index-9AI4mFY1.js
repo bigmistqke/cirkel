@@ -3571,12 +3571,12 @@ var Calendar$1 = Object.assign(Root_default, {
 });
 var index_default = Calendar$1;
 
-const calendarContainer = "_calendarContainer_btgtr_1";
-const calendar = "_calendar_btgtr_1";
-const cell = "_cell_btgtr_86";
-const indicator = "_indicator_btgtr_96";
-const today = "_today_btgtr_127";
-const past = "_past_btgtr_132";
+const calendarContainer = "_calendarContainer_fx3l1_1";
+const calendar = "_calendar_fx3l1_1";
+const cell = "_cell_fx3l1_86";
+const indicator = "_indicator_fx3l1_95";
+const today = "_today_fx3l1_126";
+const past = "_past_fx3l1_131";
 const styles$4 = {
 	calendarContainer: calendarContainer,
 	calendar: calendar,
@@ -3626,20 +3626,19 @@ const isSameDayOrBefore = (a, b) => {
   return false;
 };
 function normalizeDate(date) {
-  return new Date(Math.ceil(date.getTime() / DAY) * DAY);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 function addDays(date, amount) {
-  return new Date(date.getTime() + amount * DAY);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount);
+}
+function daysBetween(a, b) {
+  return Math.round((normalizeDate(b).getTime() - normalizeDate(a).getTime()) / DAY);
 }
 function getDayOfTheCycle(store, date) {
-  let last = store.entries[store.entries.length - 1].date;
-  let lastTime = last.getTime();
-  const normalizedDate = normalizeDate(date).getTime();
-  if (last.getTime() > normalizedDate) {
-    lastTime -= Math.floor((lastTime - normalizedDate) / store.settings.cycle.cycleDuration) * store.settings.cycle.cycleDuration * DAY;
-  }
-  const dayOfTheCycle = (normalizedDate - lastTime) / DAY % store.settings.cycle.cycleDuration;
-  return dayOfTheCycle;
+  const last = store.entries[store.entries.length - 1].date;
+  const { cycleDuration } = store.settings.cycle;
+  const days = daysBetween(last, date);
+  return (days % cycleDuration + cycleDuration) % cycleDuration;
 }
 function getDaysUntilCycleCompletes(store, date) {
   return store.settings.cycle.cycleDuration - getDayOfTheCycle(store, date);
@@ -3908,22 +3907,22 @@ function Calendar() {
   })();
 }
 
-const home = "_home_cmsao_1";
-const timeline = "_timeline_cmsao_14";
-const gradient = "_gradient_cmsao_17";
-const ruler = "_ruler_cmsao_23";
-const main = "_main_cmsao_43";
-const statement = "_statement_cmsao_84";
+const home = "_home_tatx5_1";
+const timeline = "_timeline_tatx5_14";
+const gradient = "_gradient_tatx5_17";
+const ruler = "_ruler_tatx5_23";
+const main = "_main_tatx5_43";
+const statement = "_statement_tatx5_83";
 const styles$3 = {
 	home: home,
 	timeline: timeline,
 	gradient: gradient,
 	ruler: ruler,
 	main: main,
-	"text-path": "_text-path_cmsao_75",
+	"text-path": "_text-path_tatx5_75",
 	statement: statement,
-	"cycle-button-container": "_cycle-button-container_cmsao_90",
-	"cycle-button": "_cycle-button_cmsao_90"
+	"cycle-button-container": "_cycle-button-container_tatx5_89",
+	"cycle-button": "_cycle-button_tatx5_89"
 };
 
 /**
@@ -4239,11 +4238,11 @@ function MenuModal(props) {
             },
             onLeftClick: () => setStore(produce((store2) => {
               const entry = store2.entries[store2.entries.length - 1];
-              entry.date = new Date(entry.date.getTime() + DAY);
+              entry.date = addDays(entry.date, 1);
             })),
             onRightClick: () => setStore(produce((store2) => {
               const entry = store2.entries[store2.entries.length - 1];
-              entry.date = new Date(entry.date.getTime() - DAY);
+              entry.date = addDays(entry.date, -1);
             })),
             get title() {
               return (() => {
@@ -4287,7 +4286,7 @@ const modals = createModals({
   cycleStart: CycleStartModal
 });
 
-var _tmpl$$2 = /* @__PURE__ */ template(`<em> `), _tmpl$2 = /* @__PURE__ */ template(`<div>until your period ends`), _tmpl$3 = /* @__PURE__ */ template(`<div>until day of your ovulation`), _tmpl$4 = /* @__PURE__ */ template(`<div><div><div></div><div></div></div><section><section><em> day</em><div>of your cycle</div></section><section></section></section><section><div><button></button><svg width=120 height=120 viewBox="0 0 120 120"><defs><path fill-rule=evenodd id=MyPath stroke=white></path></defs><text><textPath href=#MyPath stroke=white startOffset=25px textLength=85px>a new cycle`), _tmpl$5 = /* @__PURE__ */ template(`<div>`), _tmpl$6 = /* @__PURE__ */ template(`<div>until your cycle is completed`);
+var _tmpl$$2 = /* @__PURE__ */ template(`<em> `), _tmpl$2 = /* @__PURE__ */ template(`<div>until your period ends`), _tmpl$3 = /* @__PURE__ */ template(`<div>until day of your ovulation`), _tmpl$4 = /* @__PURE__ */ template(`<div><div><div></div><div></div></div><section><section><em> day</em><div>of your cycle</div></section><section></section></section><section><div><button></button><svg width=120 height=120 viewBox="0 0 120 120"><defs><path fill-rule=evenodd id=MyPath stroke=white></path></defs><text><textPath href=#MyPath stroke=white startOffset=50% text-anchor=middle textLength=85 lengthAdjust=spacing>a new cycle`), _tmpl$5 = /* @__PURE__ */ template(`<div>`), _tmpl$6 = /* @__PURE__ */ template(`<div>until your cycle is completed`);
 const [bounds, setBounds] = createSignal(document.body.getBoundingClientRect());
 new ResizeObserver(() => setBounds(document.body.getBoundingClientRect())).observe(document.body);
 function Home() {
@@ -4472,9 +4471,10 @@ function App() {
       const data = JSON.parse(json);
       return {
         ...data,
+        // normalizeDate also migrates entries saved as UTC midnights by older versions.
         entries: data.entries.map((entry) => ({
           ...entry,
-          date: new Date(entry.date)
+          date: normalizeDate(new Date(entry.date))
         })),
         currentDate: normalizeDate(/* @__PURE__ */ new Date())
       };
